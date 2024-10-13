@@ -30,6 +30,7 @@
   <input type="number" class="form-control" id="idade" >
 </div>
 <button type="button" class="btn btn-primary" onclick="salvarUsuario()" >Salvar</button>
+<button type="button" class="btn btn-secondary" onclick="document.getElementById('formUser').reset()" >Novo</button>
 
 </form>
 
@@ -46,6 +47,8 @@
 				data : JSON.stringify({id : id, nome : nome, idade : idade}) ,
 				contentType : "application/json ; charset=utf-8",
 				success : function(response) {
+					
+					$("#id").val(response.id);
 
 					alert("Salvou com sucesso")		  
 				}
