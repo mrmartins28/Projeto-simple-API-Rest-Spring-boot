@@ -12,6 +12,14 @@
 	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
 	crossorigin="anonymous">
 
+
+<style type="text/css">
+html {
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-top: 5%;
+}
+</style>
 </head>
 
 <body>
@@ -40,6 +48,7 @@
 			onclick="document.getElementById('formUser').reset()">Novo</button>
 		<button type="button" class="btn btn-danger" data-bs-toggle="modal"
 			data-bs-target="#modalUser">Pesquisar</button>
+		<button type="button" class="btn btn-warning" onclick="botaodeletar()">Deletar</button>
 
 	</form>
 
@@ -62,23 +71,25 @@
 							<label for="nomebusca" class="col-form-label">Informe o
 								nome</label> <input type="text" class="form-control" id="nomebusca">
 						</div>
-						<button type="button" class="btn btn-success" onclick="pesquisarUsuario()" >Buscar</button>
+						<button type="button" class="btn btn-success"
+							onclick="pesquisarUsuario()">Buscar</button>
 					</form>
+					<div style="height: 300px; overflow: scroll;">
+						<table class="table" id="tabelaresultados">
+							<thead>
+								<tr>
+									<th scope="col">Id</th>
+									<th scope="col">Nome</th>
+									<th scope="col">Editar</th>
+									<th scope="col">Deletar</th>
 
-					<table class="table" id="tabelaresultados">
-						<thead>
-							<tr>
-								<th scope="col">Id</th>
-								<th scope="col">Nome</th>
-								<th scope="col">Editar</th>
+								</tr>
+							</thead>
+							<tbody>
 
-							</tr>
-						</thead>
-						<tbody>
-
-						</tbody>
-					</table>
-
+							</tbody>
+						</table>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary"
@@ -92,78 +103,110 @@
 
 
 	<script type="text/javascript">
-	
-	
-	function colocaremedicao(id) {
-		
-		  if (!id || isNaN(id)) {
-		        alert("ID inválido!" + id);  // Verifica se o id é um número válido
-		        return;
-		    }
-		
-		$.ajax({
-			method : "GET",
-			url : "buscarPorId",
-			data : "iduser=" + id ,
-			success : function(response) {
-					
-				
-				$("#id").val(response.id);
-				$("#nome").val(response.nome);
-				$("#idade").val(response.idade);
-				
-				$('#modalUser').modal('hide');
-				
-				
+		function botaodeletar() {
 
+			var id = $('#id').val();
+
+			if (id != null && id.trim() != '') {
+				deletarPorId(id);
+				document.getElementById('formUser').reset();
+			} else {
+				alert('Id do usuário inválido');
 			}
-		}).fail(function(xhr, status, errorThrown) {
-			alert("Erro ao pesquisar usuário: " + xhr.responseText);
-		});
-		
-		
-		
-	}
-	
-	
-	function pesquisarUsuario() {
-		
-		var nome = $("#nomebusca").val();
-		
-		if(nome != null && nome.trim() != ''){
-			
-			
+		}
+
+		function colocaremedicao(id) {
+
+			if (!id || isNaN(id)) {
+				alert("ID inválido!" + id); // Verifica se o id é um número válido
+				return;
+			}
+
 			$.ajax({
 				method : "GET",
-				url : "buscapornome",
-				data : "nome=" + nome,
-				
+				url : "buscarPorId",
+				data : "iduser=" + id,
 				success : function(response) {
-						
-								$('#tabelaresultados > tbody > tr').remove();
-					
-					for (var i = 0; i < response.length; i++){
-						
-						$('#tabelaresultados > tbody').append('<tr><td>'+ response[i].id +'</td>' + '<td>'+ response[i].nome +'</td>' +
-								'<td><button type="button" class="btn btn-link" onclick="colocaremedicao('+ response[i].id+')" >Editar</button></td></tr>');
-						
-					}
+
+					$("#id").val(response.id);
+					$("#nome").val(response.nome);
+					$("#idade").val(response.idade);
+
+					$('#modalUser').modal('hide');
 
 				}
 			}).fail(function(xhr, status, errorThrown) {
-				alert("Erro ao pesquisar usuário: " + xhr.responseText);
+				alert("Erro ao pesquisar usuário por id " + xhr.responseText);
 			});
-			
+
 		}
-		
-	}
-	
-	
+
+		function pesquisarUsuario() {
+
+			var nome = $("#nomebusca").val();
+
+			if (nome != null && nome.trim() != '') {
+
+				$
+						.ajax(
+								{
+									method : "GET",
+									url : "buscapornome",
+									data : "nome=" + nome,
+
+									success : function(response) {
+
+										$('#tabelaresultados > tbody > tr')
+												.remove();
+
+										for (var i = 0; i < response.length; i++) {
+
+											$('#tabelaresultados > tbody')
+													.append(
+															'<tr id="'+ response[i].id +'"><td>'
+																	+ response[i].id
+																	+ '</td>'
+																	+ '<td>'
+																	+ response[i].nome
+																	+ '</td>'
+																	+ '<td><button type="button" class="btn btn-link" onclick="colocaremedicao('
+																	+ response[i].id
+																	+ ')" >Editar</button></td><td><button type="button" class="btn btn-link" onclick="deletarPorId('
+																	+ response[i].id
+																	+ ')" >Deletar</button></td></tr>');
+
+										}
+
+									}
+								}).fail(
+								function(xhr, status, errorThrown) {
+									alert("Erro ao pesquisar usuário: "
+											+ xhr.responseText);
+								});
+
+			}
+
+		}
+
 		function salvarUsuario() {
 
 			var id = $("#id").val();
 			var nome = $("#nome").val();
 			var idade = $("#idade").val();
+
+			if (nome == null || nome != null && nome.trim() == '') {
+
+				$('#nome').focus();
+				alert('Informe o nome!');
+				return;
+			}
+
+			if (idade == null || idade != null && idade.trim() == '') {
+
+				$('#idade').focus();
+				alert('Informe a idade!');
+				return;
+			}
 
 			$.ajax({
 				method : "POST",
@@ -184,6 +227,29 @@
 				alert("Erro ao salvar usuário: " + xhr.responseText);
 			});
 
+		}
+
+		function deletarPorId(id) {
+
+			if (confirm('Deseja realmente excluir?')) {
+
+				$.ajax({
+					method : "DELETE",
+					url : "delete",
+					data : "id=" + id,
+
+					success : function(response) {
+
+						$('#' + id).remove();
+
+						alert("Usuário deletado com sucesso!");
+
+					}
+
+				}).fail(function(xhr, status, errorThrown) {
+					alert("Erro ao delatar usuário: " + xhr.responseText);
+				});
+			}
 		}
 	</script>
 
