@@ -3,67 +3,200 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
- <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
 
 </head>
 
 <body>
-<h3> Spring boot Project</h3>
+	<h3>Spring boot Project</h3>
 
-<form action="" id = "formUser">
+	<form action="" id="formUser">
 
-<div class="mb-3">
-  <label for="id" class="form-label">ID</label>
-  <input type="text" class="form-control" id="id" readonly="readonly">
-</div>
+		<div class="mb-3">
+			<label for="id" class="form-label">ID</label> <input type="text"
+				class="form-control" id="id" readonly="readonly">
+		</div>
 
-<div class="mb-3">
-  <label for="nome" class="form-label">Nome do Usuário</label>
-  <input type="text" class="form-control" id="nome" placeholder="Informe o nome">
-</div>
+		<div class="mb-3">
+			<label for="nome" class="form-label">Nome do Usuário</label> <input
+				type="text" class="form-control" id="nome"
+				placeholder="Informe o nome">
+		</div>
 
-<div class="mb-3">
-  <label for="idade" class="form-label">Idade</label>
-  <input type="number" class="form-control" id="idade" >
-</div>
-<button type="button" class="btn btn-primary" onclick="salvarUsuario()" >Salvar</button>
-<button type="button" class="btn btn-secondary" onclick="document.getElementById('formUser').reset()" >Novo</button>
+		<div class="mb-3">
+			<label for="idade" class="form-label">Idade</label> <input
+				type="number" class="form-control" id="idade">
+		</div>
+		<button type="button" class="btn btn-primary"
+			onclick="salvarUsuario()">Salvar</button>
+		<button type="button" class="btn btn-secondary"
+			onclick="document.getElementById('formUser').reset()">Novo</button>
+		<button type="button" class="btn btn-danger" data-bs-toggle="modal"
+			data-bs-target="#modalUser">Pesquisar</button>
 
-</form>
+	</form>
 
-<script type="text/javascript">
-	function salvarUsuario() {
+
+
+
+	<div class="modal fade" id="modalUser" tabindex="-1"
+		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Pesquisa de
+						Usuário</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="mb-3">
+							<label for="nomebusca" class="col-form-label">Informe o
+								nome</label> <input type="text" class="form-control" id="nomebusca">
+						</div>
+						<button type="button" class="btn btn-success" onclick="pesquisarUsuario()" >Buscar</button>
+					</form>
+
+					<table class="table" id="tabelaresultados">
+						<thead>
+							<tr>
+								<th scope="col">Id</th>
+								<th scope="col">Nome</th>
+								<th scope="col">Editar</th>
+
+							</tr>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Fechar</button>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<script type="text/javascript">
+	
+	
+	function colocaremedicao(id) {
 		
-		var id = $("#id").val();
-		var nome = $("#nome").val();
-		var idade = $("#idade").val();
+		  if (!id || isNaN(id)) {
+		        alert("ID inválido!" + id);  // Verifica se o id é um número válido
+		        return;
+		    }
 		
-		  $.ajax({
+		$.ajax({
+			method : "GET",
+			url : "buscarPorId",
+			data : "iduser=" + id ,
+			success : function(response) {
+					
+				
+				$("#id").val(response.id);
+				$("#nome").val(response.nome);
+				$("#idade").val(response.idade);
+				
+				$('#modalUser').modal('hide');
+				
+				
+
+			}
+		}).fail(function(xhr, status, errorThrown) {
+			alert("Erro ao pesquisar usuário: " + xhr.responseText);
+		});
+		
+		
+		
+	}
+	
+	
+	function pesquisarUsuario() {
+		
+		var nome = $("#nomebusca").val();
+		
+		if(nome != null && nome.trim() != ''){
+			
+			
+			$.ajax({
+				method : "GET",
+				url : "buscapornome",
+				data : "nome=" + nome,
+				
+				success : function(response) {
+						
+								$('#tabelaresultados > tbody > tr').remove();
+					
+					for (var i = 0; i < response.length; i++){
+						
+						$('#tabelaresultados > tbody').append('<tr><td>'+ response[i].id +'</td>' + '<td>'+ response[i].nome +'</td>' +
+								'<td><button type="button" class="btn btn-link" onclick="colocaremedicao('+ response[i].id+')" >Editar</button></td></tr>');
+						
+					}
+
+				}
+			}).fail(function(xhr, status, errorThrown) {
+				alert("Erro ao pesquisar usuário: " + xhr.responseText);
+			});
+			
+		}
+		
+	}
+	
+	
+		function salvarUsuario() {
+
+			var id = $("#id").val();
+			var nome = $("#nome").val();
+			var idade = $("#idade").val();
+
+			$.ajax({
 				method : "POST",
 				url : "salvar",
-				data : JSON.stringify({id : id, nome : nome, idade : idade}) ,
+				data : JSON.stringify({
+					id : id,
+					nome : nome,
+					idade : idade
+				}),
 				contentType : "application/json ; charset=utf-8",
 				success : function(response) {
-					
+
 					$("#id").val(response.id);
 
-					alert("Salvou com sucesso")		  
+					alert("Salvou com sucesso")
 				}
 			}).fail(function(xhr, status, errorThrown) {
 				alert("Erro ao salvar usuário: " + xhr.responseText);
 			});
-		
-	}
-</script>
+
+		}
+	</script>
 
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+		integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+		crossorigin="anonymous"></script>
 
- <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<!-- Option 1: Bootstrap Bundle with Popper -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+		crossorigin="anonymous"></script>
 
 
 
